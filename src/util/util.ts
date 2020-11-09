@@ -1,3 +1,4 @@
+import { exception } from "console";
 import fs from "fs";
 import Jimp = require("jimp");
 
@@ -29,6 +30,10 @@ export async function filterImageFromURL(inputURL: string): Promise<string> {
 //    files: string[] array of absolute paths to files
 export async function deleteLocalFiles(files: string[]) {
     for ( const file of files) {
-        fs.unlinkSync(file);
+        try {
+            fs.unlinkSync(file);
+        } catch (e) {
+            // do something
+        }
     }
 }
