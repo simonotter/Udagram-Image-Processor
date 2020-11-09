@@ -1,6 +1,8 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import bodyParser from "body-parser";
+import express, { Request, Response } from "express";
+import validUrl = require("valid-url");
+
+import {deleteLocalFiles, filterImageFromURL} from "./util/util";
 
 (async () => {
 
@@ -8,39 +10,53 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   const app = express();
 
   // Set the network port
-  const port = process.env.PORT || 8083;
-  
+  const port = process.env.PORT || 8084;
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
-  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
-  // IT SHOULD
-  //    1
-  //    1. validate the image_url query
-  //    2. call filterImageFromURL(image_url) to filter the image
-  //    3. send the resulting file in the response
-  //    4. deletes any files on the server on finish of the response
   // QUERY PARAMATERS
   //    image_url: URL of a publicly accessible image
   // RETURNS
-  //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
+  //   the filtered image file
+  app.get( "/filteredimage/", async ( req: Request, res: Response ) => {
+    // Get the query string
+    const imageUrl = req.query.image_url;
 
-  /**************************************************************************** */
+    // Validate the query string is provided and is a URL
+    if ( !imageUrl || !validUrl.isUri(imageUrl) ) {
+      res.status(400).send("You must provide a valid image URL");
+    }
 
-  //! END @TODO1
-  
+    // Download and filter image
+    const newImage = await filterImageFromURL(imageUrl);
+    if ( newImage === "error") {
+      res.status(415).send("URL is not an image");
+    } else {
+      // return filtered image
+      res.status(200).sendFile(
+        newImage, () => {
+          // delete temp file on the server on finish of the response
+          deleteLocalFiles([newImage.toString()]);
+        },
+      );
+    }
+
+  } );
+
   // Root Endpoint
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
-    res.send("try GET /filteredimage?image_url={{}}")
+    res.send("try GET /filteredimage?image_url={{}}");
   } );
-  
 
   // Start the Server
   app.listen( port, () => {
+      // tslint:disable-next-line: no-console
       console.log( `server running http://localhost:${ port }` );
+      // tslint:disable-next-line: no-console
       console.log( `press CTRL+C to stop server` );
   } );
 })();
