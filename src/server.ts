@@ -1,6 +1,7 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import bodyParser from "body-parser";
+import express from "express";
+
+import {deleteLocalFiles, filterImageFromURL} from "./util/util";
 
 (async () => {
 
@@ -9,7 +10,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   // Set the network port
   const port = process.env.PORT || 8083;
-  
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -29,18 +30,19 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
-  //! END @TODO1
-  
+  // ! END @TODO1
+
   // Root Endpoint
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
-    res.send("try GET /filteredimage?image_url={{}}")
+    res.send("try GET /filteredimage?image_url={{}}");
   } );
-  
 
   // Start the Server
   app.listen( port, () => {
+      // tslint:disable-next-line: no-console
       console.log( `server running http://localhost:${ port }` );
+      // tslint:disable-next-line: no-console
       console.log( `press CTRL+C to stop server` );
   } );
 })();
